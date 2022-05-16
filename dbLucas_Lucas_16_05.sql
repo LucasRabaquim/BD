@@ -132,7 +132,8 @@ update tbConta set Saldo = Saldo-30;
 -- OBS: o valor de 9879 está diferente por causa do aumento de 10% do salário
 select * from tbConta; 
 
--- 8
+-- 8.
 delete from tbConta where NumeroConta = 9878;
 -- Não é possível atualizar a linha devido a chave estrangeira com tbHistórico.
 select * from tbConta;
+-- delete from tbHistorico where NumeroConta = 9878; -- Linha para deletar o registro com a chave estrangeira que dá problema.
