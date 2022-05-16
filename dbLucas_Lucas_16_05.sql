@@ -71,7 +71,7 @@ insert into tbCliente (CPF,Nome,Sexo,Endereco) values (12345678912,'Monica','F',
 insert into tbCliente (CPF,Nome,Sexo,Endereco) values (12345678913,'Cascão','M','Av Principal, 369');
 select * from tbCliente;
 
-insert into tbConta (NumeroConta, Saldo, TipoConta, NumAgencia) values (9876, 456.05, 1, 123);
+insert into tbConta (NumeroConta, Saldo, TipoConta, NumAgencia) values (9876, 501.66, 1, 123);
 insert into tbConta (NumeroConta, Saldo, TipoConta, NumAgencia) values (9877, 321.00, 1, 123);
 insert into tbConta (NumeroConta, Saldo, TipoConta, NumAgencia) values (9878, 100.00, 2, 485);
 insert into tbConta (NumeroConta, Saldo, TipoConta, NumAgencia) values (9879, 5589.48, 1, 401);
@@ -128,3 +128,11 @@ update tbCliente set Nome="Enildo Candido" where Nome="Enildo";
 select * from tbCliente;
 
 -- 7.
+update tbConta set Saldo = Saldo-30;
+-- OBS: o valor de 9879 está diferente por causa do aumento de 10% do salário
+select * from tbConta; 
+
+-- 8
+delete from tbConta where NumeroConta = 9878;
+-- Não é possível atualizar a linha devido a chave estrangeira com tbHistórico.
+select * from tbConta;
