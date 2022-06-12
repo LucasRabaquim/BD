@@ -41,7 +41,7 @@ create table tbClientePF(
 	CPF char(11) primary key,
     RG int(9) not null,
     RG_Dig int(1) not null,
-    Nasc date not null,
+    Nasc date not null
 );
 create table tbClientePJ(
 	CNPJ char(14) primary key,
@@ -94,7 +94,7 @@ create table tbEndereco(
     Logradouro varchar(200),
     IdBairro int not null,
     IdCidade int not null,
-    IdUF int not null,
+    IdUF int not null
 );
 
 create table tbCliente_endereco(
