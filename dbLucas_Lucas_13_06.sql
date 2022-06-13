@@ -121,7 +121,35 @@ delimiter $$
 create procedure spInsertFornecedor (vCNPJ numeric(13), vNomeFornecedor varchar(100) , vTelefone numeric(11))
 begin
 	insert into tbFornecedor(CNPJ, NomeFornecedor, telefone) values(vCNPJ, vNomeFornecedor, vTelefone);
-end $$
+end
+$$
+
+ -- drop procedure spInsertCidade; -- Salvação do mundo
+
+describe tbCidade;
+delimiter $$
+create procedure spInsertCidade(vIdCidade int, vCidade varchar(200))
+begin
+	insert into tbCidade(idCidade, Cidade) values (vIdCidade, vCidade);
+end
+$$
+
+
+describe tbUF;
+delimiter $$
+create procedure spInsertUF(vIdUf int, vEstado varchar(200))
+begin
+	insert into tbUF(IdUf,UF) values (vIdUf,vEstado);
+end
+$$
+
+describe tbBairro;
+delimiter $$
+create procedure spInsertBairro(vIdBairro int, vBairro varchar(200))
+begin
+	insert into tbBairro(IdBairro,Bairro) values (vIdBairro,vBairro);
+end
+$$
 
 call spInsertFornecedor(1245678937123, "Revenda Chico Loco", 11934567897);
 call spInsertFornecedor(1345678937123, "José Faz Tudo S/A", 11934567898);
@@ -132,14 +160,28 @@ call spInsertFornecedor(1745678937123, "Marcelo Dedal", 11934567802);
 call spInsertFornecedor(1845678937123, "Franciscano Cachaça", 11934567803);
 call spInsertFornecedor(1945678937123, "Joãozinho Chupeta", 11934567804);
 
-
-insert into tbFornecedor (CNPJ, NomeFornecedor, telefone) values (1245678937123,"Revenda Chico Loco",11934567897);
-insert into tbFornecedor (CNPJ, NomeFornecedor, telefone) values (1345678937123,"José Faz Tudo S/A",11934567898);
-insert into tbFornecedor (CNPJ, NomeFornecedor, telefone) values (1445678937123,"Vadalto Entregas",11934567899);
-insert into tbFornecedor (CNPJ, NomeFornecedor, telefone) values (1545678937123,"Astrogildo das Estrelas",11934567800);
-insert into tbFornecedor (CNPJ, NomeFornecedor, telefone) values (1645678937123,"Amoroso e Doce",11934567801);
-insert into tbFornecedor (CNPJ, NomeFornecedor, telefone) values (1745678937123,"Marcelo Dedal",11934567802);
-insert into tbFornecedor (CNPJ, NomeFornecedor, telefone) values (1845678937123,"Franciscano Cachaça",11934567803);
-insert into tbFornecedor (CNPJ, NomeFornecedor, telefone) values (1945678937123,"Joãozinho Chupeta",11934567804);
-
 select * from tbFornecedor;
+
+call spInsertCidade(1, "Rio de Janeiro");
+call spInsertCidade(2, "São Carlos");
+call spInsertCidade(3, "Campinas");
+call spInsertCidade(4, "Franco da Rocha");
+call spInsertCidade(5, "Osasco");
+call spInsertCidade(6, "Pirituba");
+call spInsertCidade(7, "Lapa");
+call spInsertCidade(8, "Ponta Grossa");
+
+select * from tbCidade;
+
+call spInsertUF(1, "SP");
+call spInsertUF(2, "RJ");
+call spInsertUF(3, "RS");
+
+select * from tbUF;
+
+call spInsertBairro(1, "Aclimação");
+call spInsertBairro(2, "Capão Redondo");
+call spInsertBairro(3, "Pirituba");
+call spInsertBairro(4, "Liberdade");
+
+select * from tbBairro;
