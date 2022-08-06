@@ -1,5 +1,4 @@
-
--- set sql_set_updates = 0; -- Para poder excluir sem Where. 
+set sql_safe_updates= 0; -- Para poder excluir sem Where. 
 drop database dbDistribuidora;
 create database dbDistribuidora;
 use dbDistribuidora;
@@ -140,7 +139,7 @@ $$
 
 describe tbUF;
 delimiter $$
-create procedure spInsertUF(vIdUf int, vEstado varchar(200))
+create procedure spInsertUF(vEstado varchar(200))
 begin
 	insert into tbUF(UF) values (vEstado);
 end
@@ -148,7 +147,7 @@ $$
 
 describe tbBairro;
 delimiter $$
-create procedure spInsertBairro(vIdBairro int, vBairro varchar(200))
+create procedure spInsertBairro(vBairro varchar(200))
 begin
 	insert into tbBairro(Bairro) values (vBairro);
 end
@@ -162,37 +161,30 @@ begin
 end
 $$
 
-
-drop procedure spInsertEndereco;
 describe tbEndereco;
 delimiter $$
 create procedure spInsertEndereco(vCep decimal(8,0),vLogradouro varchar(200),vBairro varchar(200), vCidade varchar(200), vEstado varchar(200))
 begin
-
-	declare dBairro int;
-	declare dCidade int;
-	declare dEstado int;
+	declare codBairro int;
+	declare codCidade int;
+	declare codEstado int;
 	if not exists(select IdUf from tbUf where UF = vEstado) then
 		call spInsertUf(vEstado);
 	end if;
     if not exists(select IdCidade from tbCidade where Cidade = vCidade) then
-		call spInsertUf(vCidade);
+		call spInsertCidade(vCidade);
 	end if;
-    if not exists(select IdBairro from tbUf where UF = vEstado) then
-		call spInsertUf(vEstado);
+    if not exists(select IdBairro from tbBairro where Bairro = vBairro) then
+		call spInsertBairro(vBairro);
 	end if;
-
 	if not exists(select * from tbEndereco where Cep = vCep) then
-		set dBairro = (select idBairro from tbBairro where bairro = vBairro);
-		set dCidade = (select idCidade from tbCidade where Cidade = vCidade);
-		set dEstado = (select idUf from tbuf where uf = vEstado);
-		insert into tbEndereco(CEP,Logradouro,IdBairro,IdCidade,IdUF) values (vCep,vLogradouro, dBairro ,dCidade,dEstado);
+		set codBairro = (select IdBairro from tbBairro where Bairro = vBairro);
+		set codCidade = (select IdCidade from tbCidade where Cidade = vCidade);
+		set codEstado = (select IdUf from tbUF where Uf = vEstado);
+		insert into tbEndereco(CEP,Logradouro,IdBairro,IdCidade,IdUF) values (vCep,vLogradouro,codBairro,codCidade,codEstado);
 	end if;
-	
 end
 $$
-
-select *from tbendereco;
 
 call spInsertFornecedor(1245678937123, "Revenda Chico Loco", 11934567897);
 call spInsertFornecedor(1345678937123, "José Faz Tudo S/A", 11934567898);
@@ -215,8 +207,6 @@ call spInsertCidade("Lapa");
 call spInsertCidade("Ponta Grossa");
 call spInsertCidade("São Paulo");
 call spInsertCidade("Barra Mansa");
-
-
 
 select * from tbCidade;
 
@@ -247,17 +237,6 @@ call spInsertProduto(12345678910117,'Farinha de Surui',50.00,200);
 call spInsertProduto(12345678910118,'Zelador de Cemitério',24.50,100);
 
 select * from tbProduto;
-/*
-call spInsertProduto('cep,Lougradouro,Bairro,cidade,uf');
-call spInsertProduto(12345054,'Lougra',,120);
-call spInsertProduto(12345054,'Lougra',,120);
-call spInsertProduto(12345054,'Lougra',,120);
-call spInsertProduto(12345054,'Lougra',,120);
-call spInsertProduto(12345054,'Lougra',,120);
-call spInsertProduto(12345054,'Lougra',,120);
-call spInsertProduto(12345054,'Lougra',,120);
-call spInsertProduto(12345054,'Lougra',,120);
-select * from tbEndereco;*/
 
 call spInsertEndereco(12345050, "Rua da Federal", "Lapa", "São Paulo", "SP");
 call spInsertEndereco(12345051, "Av Brasil", "Lapa", "Campinas", "SP");
@@ -268,6 +247,4 @@ call spInsertEndereco(12345055, "Rua Piu X1", "Penha", "Campinas", "SP");
 call spInsertEndereco(12345056, "Rua chocolate", "Aclimação", "Barra Mansa", "RJ");
 call spInsertEndereco(12345057, "Rua Pão na Chapa", "Barra Funda", "Ponta Grossa", "RS");
 
-
-
-
+Select * from tbEndereco;
