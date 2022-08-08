@@ -168,13 +168,13 @@ begin
 	declare codBairro int;
 	declare codCidade int;
 	declare codEstado int;
-	if not exists(select IdUf from tbUf where UF = vEstado) then
+	if not exists(select * from tbUf where UF = vEstado) then
 		call spInsertUf(vEstado);
 	end if;
-    if not exists(select IdCidade from tbCidade where Cidade = vCidade) then
+    if not exists(select * from tbCidade where Cidade = vCidade) then
 		call spInsertCidade(vCidade);
 	end if;
-    if not exists(select IdBairro from tbBairro where Bairro = vBairro) then
+    if not exists(select * from tbBairro where Bairro = vBairro) then
 		call spInsertBairro(vBairro);
 	end if;
 	if not exists(select * from tbEndereco where Cep = vCep) then
