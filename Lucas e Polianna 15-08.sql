@@ -167,9 +167,6 @@ describe tbEndereco;
 delimiter $$
 create procedure spInsertEndereco(vCep decimal(8,0),vLogradouro varchar(200),vBairro varchar(200), vCidade varchar(200), vEstado varchar(200))
 begin
-	declare codBairro int;
-	declare codCidade int;
-	declare codEstado int;
 	if not exists(select * from tbUf where UF = vEstado) then
 		call spInsertUf(vEstado);
 	end if;
@@ -321,9 +318,12 @@ describe tbFornecedor;
 describe tbProduto;
 delimiter $$
 create procedure spInsertCompra(vNotaFiscal int,vFornecedor varchar(100), vDataCompra date, vCodigoBarras decimal(14,0), vValorItem decimal(5,2), vQtd int)
-	if exists(select * from tbPedido where NotaFiscal = vNotaFiscal)
-	set @vQtdTotal = (select sum(Qtd) from tbPedidoProduto where NotaFiscal = vNotaFiscal);
-    -- , vValorTot decimal(6,2)
+	if exists(select * from tbPedido where NotaFiscal = vNotaFiscal) then
+		set @QtdTotal = (select sum(Qtd) from tbPedidoProduto where NotaFiscal = vNotaFiscal);
+    else
+		set @QtdTotal = vQtd;
+    end if;    
+    set @ValorTot = vValorItem*@QtdTotal;
 	set @Fornecedor = (select IdFornecedor from tbFornecedor where NomeFornecedor = vFornecedor);
 	insert into tbPedido(NotaFiscalPedido,DataCompra,ValorTotal,QtdTotal,IdFornecedor) values (vNotaFiscal,vDataCompra,vValorTotal,vQtdTotal,@Fornecedor);
 begin
