@@ -40,7 +40,7 @@ create table tbVenda(
     NotaFiscal int,
     IdCli int not null
 );
-alter table tbVenda modify CodigoVenda numeric(10) primary key auto_increment;
+-- alter table tbVenda modify CodigoVenda numeric(10) primary key auto_increment;
 
 create table tbNotaFiscal(
 	NotaFiscal int primary key,
@@ -591,23 +591,23 @@ show tables;
 -- 30) 
 drop procedure spInsertCompra;
 delimiter $$
-create procedure spInsertCompra(vNotaFiscal int,vFornecedor varchar(100), vDataCompra char(10), vCodigoBarras decimal(14,0), vValorItem decimal(5,2), vQtd int,vQtdTotal int,vValorTotal decimal(10,2))
+create procedure spInsertCompra(vNotaFiscal int,vFornecedor varchar(100), vCodigoBarras decimal(14,0), vQtd int)
 begin
-	declare vDataFormatada date;
+	set @vData = current_timestamp();
+    set @valor = (select valor from tbProduto where CodigoBarras = vCodigoBarras);
 	if not exists(select * from tbCompra where NotaFiscalPedido = vNotaFiscal) then
         set @Fornecedor = (select IdFornecedor from tbFornecedor where NomeFornecedor = vFornecedor);
-        set vDataFormatada = str_to_date(vDataCompra, '%d/%m/%Y');
-		insert into tbCompra(NotaFiscalPedido,DataCompra,ValorTotal,QtdTotal,IdFornecedor) values (vNotaFiscal,vDataFormatada,vValorTotal,vQtdTotal,@Fornecedor);
+		insert into tbCompra(NotaFiscalPedido,DataCompra,ValorTotal,QtdTotal,IdFornecedor) values (vNotaFiscal,@vData,(vqtd*@valor),vQtd,@Fornecedor);
     end if;
     if not exists(select * from tbCompraProduto where NotaFiscalPedido = vNotaFiscal and CodigoBarras = vCodigoBarras) then
-    insert into tbCompraProduto(NotaFiscalPedido,CodigoBarras,Qtd,ValorItem) values (vNotaFiscal,vCodigoBarras,vQtd,vValorItem);
+    insert into tbCompraProduto(NotaFiscalPedido,CodigoBarras,Qtd,ValorItem) values (vNotaFiscal,vCodigoBarras,vQtd,@valor);
     else
 		call spSelectErro('Compra desse produto','já');
 	end if;
 end
 $$
 
-call spInsertCompra(10548, 'Amoroso e Doce', "10/09/2022", 12345678910111, 40.00,100,100,4000.00);
+call spInsertCompra(10548, 'Amoroso e Doce', 12345678910111,100);
 
 -- 31)
 call spSelectProduto();
