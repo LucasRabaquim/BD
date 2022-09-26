@@ -33,13 +33,14 @@ create table tbProduto(
 );
 
 create table tbVenda(
-	CodigoVenda numeric(10) primary key,
+	CodigoVenda numeric(10) primary key auto_increment,
     DataVenda date default(current_timestamp()),
     ValorTotal decimal(6,2) not null,
     QtdTotal int not null,
     NotaFiscal int,
     IdCli int not null
 );
+alter table tbVenda modify CodigoVenda numeric(10) primary key auto_increment;
 
 create table tbNotaFiscal(
 	NotaFiscal int primary key,
@@ -491,15 +492,53 @@ set CodigoBarras = new.CodigoBarras,
 	Ocorrencia = "Atualizado";
 end//
 
+call spSelectProduto();
 call spUpdateProduto(12345678910119,'água Mineral',2.99);
+
+call spUpdateProduto(12345678910199,'Boneca de plastico',111.00);
 
 select *from tbProdutoHistorico;
 
 -- 21)
 call spSelectProduto();
 
+
 -- 22)
 call spInsertVenda(4,"Disney Chaplin","26/09/2022",12345678910111,65.00,1,65.00,null);
+select * from tbCliente;
+
+drop procedure spInsertVenda;
+delimiter $$
+create procedure spInsertVenda(vCliente varchar(100), vCodigoBarras decimal(14,0), vQtd int)
+begin
+	set @vData = current_timestamp();
+    set @codigoVenda = (select max(CodigoVenda)+1 from tbVenda);
+    set @vTotal = (select Valor from tbProduto where CodigoBarras = vCodigoBarras);
+	if exists (select * from tbProduto,tbCliente where CodigoBarras = vCodigoBarras and NomeCli = vCliente) then
+		if not exists(select * from tbVenda where CodigoVenda =@codigoVenda) then
+			set @idCliente = (select IdCli from tbCliente where NomeCli = vCliente);
+			insert into tbVenda(CodigoVenda,IdCli,DataVenda,ValorTotal,QtdTotal,NotaFiscal) values (@codigoVenda,@idCliente,@vData,(@vTotal * vQtd),vQtd,null);
+		end if;
+		if not exists(select * from tbItemVenda where CodigoVenda = @codigoVenda and CodigoBarras = vCodigoBarras) then
+			  insert into tbItemVenda(CodigoVenda,CodigoBarras,ValorItem,Qtd) values (@codigoVenda,vCodigoBarras,@vTotal,vQtd);
+        else
+			call spSelectErro('Venda desse produto','já');
+		end if;
+    end if;
+	if not exists(select * from tbCliente where NomeCli = vCliente) then call spSelectErro("Cliente","não"); end if;
+	if not exists(select * from tbProduto where CodigoBarras = vCodigoBarras) then call spSelectErro("Produto","não"); end if;
+end
+$$
+
+describe tbProduto;
+select * from tbItemVenda;
+call spInsertVenda("Pimpão",12345678910114,0);
+call 
+spInsertVenda("Lança Perfume",12345678910114,10);
+select * from tbCliente;
+call spInsertVenda("Durango",12345678910114,5);
+select * from tbVenda;
+
 
 -- 23)
 select * from tbVenda ORDER BY CodigoVenda desc limit 1;
@@ -516,12 +555,11 @@ end $$
  
  describe tbCliente;
  
- call spSelectCliente('Disney Chaplin');
+ call spSelectCliente('Durango');
  
  -- 26)
 describe tbProduto;
 describe tbItemVenda;
--- drop trigger trgUpdateProdutoItemVenda;
 delimiter //
 Create trigger trgUpdateProdutoItemVenda after insert on tbItemVenda
 for each row
@@ -531,7 +569,8 @@ end
 //
 
 -- 27)
-call spInsertVenda(5,"Paganada","26/09/2022",12345678910114,10.00,15,150.00,null);
+call spInsertVenda("Paganada",12345678910114,15);
+select * from tbVenda;
 
 -- 28)
 call spSelectProduto();
@@ -550,6 +589,24 @@ describe tbCompraProduto;
 show tables;
 
 -- 30) 
+drop procedure spInsertCompra;
+delimiter $$
+create procedure spInsertCompra(vNotaFiscal int,vFornecedor varchar(100), vDataCompra char(10), vCodigoBarras decimal(14,0), vValorItem decimal(5,2), vQtd int,vQtdTotal int,vValorTotal decimal(10,2))
+begin
+	declare vDataFormatada date;
+	if not exists(select * from tbCompra where NotaFiscalPedido = vNotaFiscal) then
+        set @Fornecedor = (select IdFornecedor from tbFornecedor where NomeFornecedor = vFornecedor);
+        set vDataFormatada = str_to_date(vDataCompra, '%d/%m/%Y');
+		insert into tbCompra(NotaFiscalPedido,DataCompra,ValorTotal,QtdTotal,IdFornecedor) values (vNotaFiscal,vDataFormatada,vValorTotal,vQtdTotal,@Fornecedor);
+    end if;
+    if not exists(select * from tbCompraProduto where NotaFiscalPedido = vNotaFiscal and CodigoBarras = vCodigoBarras) then
+    insert into tbCompraProduto(NotaFiscalPedido,CodigoBarras,Qtd,ValorItem) values (vNotaFiscal,vCodigoBarras,vQtd,vValorItem);
+    else
+		call spSelectErro('Compra desse produto','já');
+	end if;
+end
+$$
+
 call spInsertCompra(10548, 'Amoroso e Doce', "10/09/2022", 12345678910111, 40.00,100,100,4000.00);
 
 -- 31)
